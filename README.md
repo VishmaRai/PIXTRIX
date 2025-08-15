@@ -77,3 +77,12 @@ DATABASE_URI=sqlite:///database.db
 
 # API Endpoint from ngrok (Colab)
 MODEL_API_URL=https://<ngrok-url>.ngrok-free.app/generate
+```
+### ⚡ Run FlaskDreamShaper.ipynb on Google Colab
+  - Copy the ngrok URL and update .env file.
+  
+### ▶️ Run the Flask App
+```bash
+flask run
+```
+Access the app at http://127.0.0.1:5000

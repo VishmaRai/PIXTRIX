@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PIXTRIX - AI Image Generator</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Logos/favicon.png') }}">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+  <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <!-- Matrix Rain Background -->
+ <canvas id="matrix-canvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-2;pointer-events:none;opacity: 0.5;"></canvas>
+
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+
+    <div class="container">
+      <!-- Header Module -->
+      <div class="header">
+        <div class="logo glitch" data-text="PIXTRIX">PIXTRIX</div>
+        <div class="user-info">
+          <a href="/add_credits" class="add-credits-btn" id="addCreditsBtn">+</a>
+          <div class="credit-count" id="creditCount">
+            <i class="fas fa-bolt"></i> {{ credits }}
+          </div>
+          <a href="/login" class="login-btn">Log In</a>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="main-content">
+        <!-- Control Panel Module -->
+        <div class="control-panel">
+                    <form method="post" id="imageForm">
+            <textarea
+              name="prompt"
+              class="prompt-area"
+              placeholder=" Describe your Image_"
+              required
+            ></textarea>
+
+            <input
+              type="hidden"
+              name="aspect"
+              id="aspectInput"
+              value="square"
+            />
+
+            <div class="controls-row">
+              <div class="aspect-select-container" id="aspectSelector">
+                <div class="aspect-select-label">Aspect Ratio</div>
+                <div class="aspect-select-value">▢ Square (1:1)</div>
+                <div class="aspect-select-options">
+                  <div class="aspect-option selected" data-value="square">
+                   ▢ Square (1:1)
+                  </div>
+                  <div class="aspect-option" data-value="portrait">
+                     ▯ Portrait (9:16)
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="generate-btn">
+                <i class="fas fa-bolt" style="margin-right: 10px"></i> Generate
+              </button>
+            </div>
+          </form>
+        </div>
+
+         <!-- Image Slots Module -->
+        <div class="image-slot" id="slot1" style="border: 2px dashed rgba(0, 0, 255, 0.447);">
+          <div class="image-placeholder">
+            <i class="fas fa-question" style="margin-right: 10px;color: rgba(0, 0, 255, 0.273)"></i>
+            
+          </div>
+          <div class="generation-overlay" style="display: none;" id="overlay1">
+            <div class="matrix-rain-container" id="matrixRain1"></div>
+            <div class="progress-info">
+             
+              <div class="hacker-loader">
+  <div class="binary-ring"></div>
+  <div class="core" style="box-shadow: 0 0 15px blue;"></div>
+  <div class="binary-digits">
+    <span>0</span>
+    <span>1</span>
+    <span>0</span>
+    <span>1</span>
+    <span>0</span>
+    <span>1</span>
+    <span>0</span>
+    <span>1</span>
+  </div>
+  <div class="loading-text">GENERATING</div>
+</div>
+            </div>
+          </div>
+        </div>
+        <div class="image-slot" id="slot2" style="border: 2px dashed rgba(255, 0, 0, 0.49);">
+          <div class="image-placeholder">
+           <i class="fas fa-question" style="margin-right: 10px;color: rgba(255, 0, 0, 0.341)"></i>
+          </div>
+          <div class="generation-overlay" style="display: none;" id="overlay2">
+            <div class="matrix-rain-container" id="matrixRain2"></div>
+            <div class="progress-info">
+            
+              <div class="hacker-loader">
+  <div class="binary-ring"></div>
+  <div class="core" style="box-shadow: 0 0 15px #ff4400;"></div>
+  <div class="binary-digits">
+    <span>0</span>
+    <span>1</span>
+    <span>0</span>
+    <span>1</span>
+    <span>0</span>
+    <span>1</span>
+    <span>0</span>
+    <span>1</span>
+  </div>
+  <div class="loading-text">GENERATING</div>
+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+   <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <div class="gallery-link-container">
+      <a href="/gallery_all">
+        <img src="{{ url_for('static', filename='Logos/Rick and morty.gif') }}" alt="PIXTRIX Gallery" class="gallery-icon">
+        <span class="gallery-text" data-text="PIXTRIX Gallery">PIXTRIX Gallery</span>
+      </a>
+    </div>
+  </body>
+</html>

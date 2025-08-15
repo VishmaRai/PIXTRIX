@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIXTRIX - Add Credits</title>
+   
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&family=Tektur:wght@400..900&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quantico', sans-serif;
+            background: #0d0d0d;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle matrix grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
+        }
+
+        /* Minimal floating code snippets */
+        .matrix-char {
+            position: fixed;
+            font-family: 'Quantico', sans-serif;
+            font-size: 0.8rem;
+            color: rgba(0, 255, 65, 0.1);
+            animation: fall 8s infinite linear;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(110vh); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            height: 100vh;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+            padding-bottom: 1.5rem;
+        }
+
+        .brand {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00ff41;
+            margin-bottom: 0.5rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: rgba(0, 255, 65, 0.8);
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+     
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 0;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .pricing-card:hover {
+            border-color: rgba(0, 255, 65, 0.6);
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-5px);
+        }
+
+        .pricing-card.recommended {
+            border-color: rgba(0, 255, 65, 0.6);
+            background: rgba(0, 255, 65, 0.03);
+        }
+
+        .pricing-card.recommended::before { 
+            content: 'POPULAR';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            background: rgba(0, 255, 65, 0.1);
+            padding: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .pricing-card.recommended {
+            padding-top: 3.5rem;
+        }
+
+        .plan-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00ff41;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .plan-subtitle {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .price-currency {
+            font-size: 1.2rem;
+            vertical-align: top;
+            color: #00ff41;
+        }
+
+        .choose-btn {
+            background: transparent;
+            color: #00ff41;
+            border: 1px solid rgba(0, 255, 65, 0.6);
+            padding: 1rem 2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: 'Quantico', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choose-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 65, 0.1);
+            transition: left 0.3s ease;
+        }
+
+        .choose-btn:hover::before {
+            left: 0;
+        }
+
+        .choose-btn:hover {
+            background: rgba(0, 255, 65, 0.05);
+            border-color: #00ff41;
+            color: #ffffff;
+        }
+
+        .features {
+            list-style: none;
+            margin: 1.5rem 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        .features li {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.8rem;
+            font-size: 0.8rem;
+            position: relative;
+            padding-left: 1.5rem;
+            font-weight: 300;
+        }
+
+        .features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00ff41;
+            font-weight: bold;
+        }
+
+        /* Terminal-style decoration */
+        .terminal-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(0, 255, 65, 0.1) 50%, 
+                transparent 100%);
+            animation: scan 3s infinite;
+        }
+
+        @keyframes scan {
+            0% { opacity: 0; transform: translateY(0); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header {
+                margin-bottom: 2rem;
+            }
+            
+            .brand {
+                font-size: 1.5rem;
+                letter-spacing: 2px;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .pricing-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .pricing-card.recommended {
+                padding-top: 3rem;
+            }
+            
+            .price {
+                font-size: 2rem;
+            }
+        }
+
+        /* Subtle cursor blink */
+        .cursor {
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.flash {
+    padding: 15px 20px;
+    border-radius: 5px;
+    font-family: 'Quantico', monospace;
+    font-size: 16px;
+    color: #000;
+    border: 2px solid;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    animation: fadeInOut 5s forwards;
+}
+
+.flash.success {
+    background-color: #00ff41;
+    border-color: #00aa2a;
+}
+
+.flash.error {
+    background-color: #ff4444;
+    border-color: #cc0000;
+}
+
+    @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+    </style>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message|safe}}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <div class="terminal-line"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="brand">PIXTRIX<span class="cursor">_</span></h1>
+            <p class="subtitle">Choose a plan that fits your needs</p>
+        </div>
+        
+        <div class="pricing-grid">
+            {% for plan_id, plan in plans.items() %}
+            <div class="pricing-card {% if plan_id == 'pro' %}recommended{% endif %}">
+                <h2 class="plan-title">{{ plan.name }}</h2>
+                <p class="plan-subtitle">{{ plan.credits }} credits per month</p>
+                <div class="price">
+                    <span class="price-currency">रु</span>{{ plan.amount }}
+                </div>
+                <ul class="features">
+                    <li>{{ plan.credits }} AI image generations</li>
+                    {% if plan_id == 'basic' %}
+                        <li>Images may or may not be blessed by Bob Ross</li>
+                        <li>AI runs on leftover Wi-Fi from your neighbor</li>
+                        <li>AI takes naps during lunch breaks</li>
+                        <li>AI operates on a phone with 1% battery</li>
+                    {% elif plan_id == 'pro' %}
+                        <li>AI trained by Picasso and supervised by aliens</li>
+                        <li>Pics so cool, your fridge wants them</li>
+                        <li>Hosted on servers carved from diamond</li>
+                        <li>Comes with a certificate of "Totally Legit Pro User"</li>
+                    {% endif %}
+                </ul>
+                <button class="choose-btn" onclick="window.location.href='/initiate_payment/{{ plan_id }}'">
+                    Select Plan
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Minimal matrix characters
+        const matrixChars = ['0', '1', '>', '<', '/', '\\', '|', '-', '+', '*', '#', '@'];
+        
+        function createMatrixChar() {
+            const char = document.createElement('div');
+            char.className = 'matrix-char';
+            char.textContent = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+            char.style.left = Math.random() * 100 + '%';
+            char.style.animationDelay = Math.random() * 8 + 's';
+            char.style.animationDuration = (Math.random() * 4 + 6) + 's';
+            document.body.appendChild(char);
+            
+            setTimeout(() => {
+                char.remove();
+            }, 12000);
+        }
+
+        // Generate matrix characters occasionally
+        setInterval(createMatrixChar, 800);
+
+        // Button interactions
+        document.querySelectorAll('.choose-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

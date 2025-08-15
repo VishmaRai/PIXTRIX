@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Library - Matrix</title>
+            <style>
+       
+        @import url('https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&family=Tektur:wght@400..900&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            color: #00ff41;
+            font-family: 'Quantico', monospace;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Prevent scrolling when lightbox is active */
+        body.lightbox-active {
+            overflow: hidden;
+        }
+
+        /* Matrix rain effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(90deg, transparent 98%, rgba(0, 255, 65, 0.03) 100%),
+                linear-gradient(180deg, transparent 98%, rgba(0, 255, 65, 0.03) 100%);
+            background-size: 20px 20px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Subtle matrix code overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 65, 0.01) 2px,
+                    rgba(0, 255, 65, 0.01) 4px
+                );
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            color: #00ff41;
+            
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+            align-items: start;
+        }
+
+        .image-card {
+            position: relative;
+            perspective: 1000px;
+            cursor: pointer;
+            break-inside: avoid;
+        }
+
+        /* Dynamic heights based on aspect ratio */
+        .image-card.square {
+            height: 280px;
+        }
+
+        .image-card.portrait {
+            height: 400px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transform-style: preserve-3d;
+        }
+
+        .image-card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .card-front:hover, .card-back:hover {
+            border-color: #00ff41;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 65, 0.4),
+                inset 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: radial-gradient(ellipse at center, rgba(0, 50, 10, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; /* Center content */
+            padding: 25px;
+            text-align: center; /* Center text */
+        }
+
+        .card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .prompt {
+            color: #0dff73; /* A slightly brighter green */
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+            font-style: italic;
+        }
+
+        .aspect-ratio {
+            color: #00ff41;
+            font-size: 0.8rem;
+            background: none; /* Remove background */
+            padding: 0;
+            border: none; /* Remove border */
+            letter-spacing: 2px;
+            opacity: 0.7; /* Make it more subtle */
+        }
+        .created-at {
+            color: #00ff41;
+            font-size: 0.8rem;
+            background: none; /* Remove background */
+            padding: 0;
+            margin-top: 10px;
+            border: none; /* Remove border */
+            letter-spacing: 2px;
+            opacity: 0.7; /* Make it more subtle */
+        }
+
+      
+
+       
+
+        .delete-button {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #ff4757;
+            border: 1px solid #ff4757;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transform: translate(-10px, 10px);
+            transition: all 0.3s ease;
+        }
+
+        .image-card:hover .delete-button {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+
+        .delete-button:hover {
+            background: #ff0000;
+            color: #fff;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .lightbox .delete-button {
+            display: none;
+        }
+
+        .download-button-card {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #00ff41;
+            border: 1px solid #00ff41;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transform: translate(10px, 10px);
+            transition: all 0.3s ease;
+        }
+
+        .image-card:hover .download-button-card {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+
+        .download-button-card:hover {
+            background: #00ff41;
+            color: #000;
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        .lightbox .download-button-card {
+            display: none;
+        }
+
+        /* Lightbox styles */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 20, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* For Safari */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            position: relative;
+            perspective: 2000px;
+            transition: width 0.3s ease, height 0.3s ease; /* Smooth resize */
+        }
+
+        .lightbox .image-card {
+            width: 100%;
+            height: 100%;
+        }
+
+        .lightbox .image-card .card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .lightbox-content .card-inner {
+            cursor: pointer;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 35px;
+            height: 35px;
+            background: #000;
+            color: #00ff41;
+            border: 1px solid #00ff41;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            font-family: 'Quantico', monospace;
+        }
+
+        .lightbox-close:hover {
+            background: #00ff41;
+            color: #000;
+            transform: rotate(90deg);
+            box-shadow: 0 0 15px #00ff41;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .image-card.square {
+                height: 240px;
+            }
+            
+            .image-card.portrait {
+                height: 340px;
+            }
+            
+        }
+
+        @media (max-width: 480px) {
+            .gallery {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            
+            .image-card.square {
+                height: 180px;
+            }
+            
+            .image-card.portrait {
+                height: 260px;
+            }
+            
+            .card-back {
+                padding: 12px;
+            }
+            
+            .prompt {
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+            
+            .image-card.square {
+                height: 320px;
+            }
+            
+            .image-card.portrait {
+                height: 460px;
+            }
+            
+        }
+
+        /* Matrix-style loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #21262d;
+            border-radius: 50%;
+            border-top-color: #00ff41;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Glitch effect for title */
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        h1:hover {
+            animation: glitch 0.5s ease-in-out;
+        }
+
+        .search-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        #search-bar {
+            padding: 10px;
+            width: 50%;
+            border: 1px solid #00ff41;
+            background-color: #000;
+            color: #00ff41;
+            font-family: 'Quantico', monospace;
+        }
+
+        #search-button {
+            padding: 10px 20px;
+            border: 1px solid #00ff41;
+            background-color: #000;
+            color: #00ff41;
+            cursor: pointer;
+            font-family: 'Quantico', monospace;
+            transition: all 0.3s ease;
+        }
+
+        #search-button:hover {
+            background-color: #00ff41;
+            color: #000;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: #000;
+            border: 1px solid #00ff41;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+         
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        }
+
+        .modal-buttons button {
+            background: #000;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 10px 60px;
+          
+            margin:  20px;
+            cursor: pointer;
+            font-family: 'Quantico', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .modal-buttons button:hover {
+            background: #00ff41;
+            color: #000;
+        }
+
+
+        .search-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 50%;
+}
+
+#search-bar {
+    width: 100%;
+    padding-right: 35px; /* make space for the × */
+}
+
+#clear-search {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 30px;
+    color: #00ff41;
+    cursor: pointer;
+    display: none; /* hidden by default */
+}
+
+#clear-search:hover {
+    color: #ff4757;
+}
+
+@media (max-width: 768px) {
+    .search-wrapper { width: 70%; }
+}
+@media (max-width: 480px) {
+    .search-wrapper { width: 100%; }
+}
+
+
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MY LIBRARY</h1>
+        <div class="search-container">
+    <div class="search-wrapper">
+        <input type="text" id="search-bar"
+               placeholder="Search Images...">
+        <button id="clear-search" title="Clear search">&times;</button>
+    </div>
+    <button id="search-button">Search</button>
+</div>
+        
+        <div class="gallery">
+            {% for image in images %}
+            <div class="image-card" data-aspect="{{ image.aspect_ratio }}" data-id="{{ image.id }}">
+              
+                <div class="card-inner">
+                    <div class="card-front">
+                        <img src="{{ url_for('static', filename=image.image_path) }}" alt="Generated Image" loading="lazy" onload="setCardType(this)">
+                    </div>
+                    <div class="card-back">
+                        <div class="prompt"><span style="color: white;">Prompt Input:</span><br> {{ image.prompt }}</div>
+                        <div class="aspect-ratio"><span style="color: white;">Aspect Ratio:</span> {{ image.aspect_ratio }}</div>
+                        <div class="created-at"><span style="color: white;">Created At:</span>  {{ image.created_at }}</div>
+
+                    </div>
+                </div>
+                <div class="delete-button" title="Delete Image">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3V2h11v1z"/>
+                    </svg>
+                </div>
+                <a href="{{ url_for('static', filename=image.image_path) }}" class="download-button-card" title="Download Image" download>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                    </svg>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="no-results-message" style="display: none; text-align: center; color: #ff4757; font-size: 1.2rem; margin-top: 20px;">No images found matching your search criteria.</div>
+    </div>
+
+    <div id="custom-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <p>Are you sure you want to delete this image?</p>
+            <div class="modal-buttons">
+                <button id="confirm-delete-btn">Yes</button>
+                <button id="cancel-delete-btn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Structure -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content" id="lightbox-content">
+            <!-- Cloned card will be inserted here -->
+            
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gallery = document.querySelector('.gallery');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxContent = document.getElementById('lightbox-content');
+            const searchBar = document.getElementById('search-bar');
+            const searchButton = document.getElementById('search-button');
+            const noResultsMessage = document.getElementById('no-results-message');
+            const allCards = document.querySelectorAll('.image-card');
+
+            // Stagger animation for cards on load
+            allCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            allCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (e.target.closest('.delete-button') || e.target.closest('.download-button-card')) {
+                        return;
+                    }
+                    // If the click is on the image itself, open the lightbox
+                    if (e.target.tagName === 'IMG') {
+                        openLightbox(card);
+                    } else {
+                        // Otherwise, flip the card
+                        this.classList.toggle('flipped');
+                    }
+                });
+            });
+
+            function openLightbox(card) {
+                const originalImage = card.querySelector('.card-front img');
+                const naturalWidth = originalImage.naturalWidth;
+                const naturalHeight = originalImage.naturalHeight;
+
+                const viewportWidth = window.innerWidth * 0.9;
+                const viewportHeight = window.innerHeight * 0.9;
+                const aspectRatio = naturalWidth / naturalHeight;
+
+                let displayWidth = viewportWidth;
+                let displayHeight = displayWidth / aspectRatio;
+
+                if (displayHeight > viewportHeight) {
+                    displayHeight = viewportHeight;
+                    displayWidth = displayHeight * aspectRatio;
+                }
+
+                lightboxContent.style.width = `${displayWidth}px`;
+                lightboxContent.style.height = `${displayHeight}px`;
+
+                const clonedCard = card.cloneNode(true);
+                clonedCard.classList.remove('flipped', 'square', 'portrait');
+                clonedCard.style.height = '100%';
+                
+                clonedCard.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                });
+
+                const existingCard = lightboxContent.querySelector('.image-card');
+                if (existingCard) {
+                    existingCard.remove();
+                }
+                lightboxContent.prepend(clonedCard);
+
+                
+
+                lightbox.classList.add('active');
+                document.body.classList.add('lightbox-active');
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                document.body.classList.remove('lightbox-active');
+            }
+
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            // Close lightbox on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                    closeLightbox();
+                }
+            });
+
+            const deleteButtons = document.querySelectorAll('.delete-button');
+            const modal = document.getElementById('custom-confirm-modal');
+            const confirmBtn = document.getElementById('confirm-delete-btn');
+            const cancelBtn = document.getElementById('cancel-delete-btn');
+
+            let imageToDelete = null;
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    imageToDelete = e.currentTarget.closest('.image-card');
+                    modal.style.display = 'flex';
+                });
+            });
+
+            confirmBtn.addEventListener('click', () => {
+                if (imageToDelete) {
+                    const imageId = imageToDelete.dataset.id;
+                    fetch(`/delete_image/${imageId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.message || 'Server error'); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            imageToDelete.remove();
+                        } else {
+                            alert('Failed to delete image: ' + (data.message || 'Unknown error.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error during image deletion:', error);
+                        alert('An error occurred while deleting the image: ' + error.message);
+                    })
+                    .finally(() => {
+                        modal.style.display = 'none';
+                        imageToDelete = null;
+                    });
+                } else {
+                    modal.style.display = 'none';
+                }
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                imageToDelete = null;
+            });
+
+            // Search functionality
+            searchButton.addEventListener('click', performSearch);
+            searchBar.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            function performSearch() {
+                const searchTerm = searchBar.value.toLowerCase().trim();
+                let resultsFound = false;
+
+                allCards.forEach(card => {
+                    const prompt = card.querySelector('.prompt').textContent.toLowerCase();
+                    const aspectRatio = card.querySelector('.aspect-ratio').textContent.toLowerCase();
+                    const createdAt = card.querySelector('.created-at').textContent.toLowerCase();
+
+                    if (prompt.includes(searchTerm) || aspectRatio.includes(searchTerm) || createdAt.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        resultsFound = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (resultsFound) {
+                    noResultsMessage.style.display = 'none';
+                } else {
+                    noResultsMessage.style.display = 'block';
+                }
+            }
+        });
+
+        function setCardType(img) {
+            const card = img.closest('.image-card');
+            const aspectRatio = card.dataset.aspect;
+            
+            // Remove any existing type classes
+            card.classList.remove('square', 'portrait');
+            
+            // Determine type based on aspect ratio or actual image dimensions
+            if (aspectRatio) {
+                const [width, height] = aspectRatio.split(':').map(Number);
+                const ratio = width / height;
+                
+                if (ratio < 1) {
+                    card.classList.add('portrait');
+                } else {
+                    card.classList.add('square');
+                }
+            } else {
+                // Fallback: use actual image dimensions
+                const ratio = img.naturalWidth / img.naturalHeight;
+                
+                if (ratio < 1) {
+                    card.classList.add('portrait');
+                } else {
+                    card.classList.add('square');
+                }
+            }
+        }
+
+        const searchBar   = document.getElementById('search-bar');
+const clearBtn    = document.getElementById('clear-search');
+
+// Show/hide × button
+searchBar.addEventListener('input', () => {
+    clearBtn.style.display = searchBar.value.trim() ? 'block' : 'none';
+});
+
+// Click × to clear
+clearBtn.addEventListener('click', () => {
+    searchBar.value = '';
+    clearBtn.style.display = 'none';
+    performSearch();           // re-run filter to show all cards again
+});
+    </script>
+</body>
+</html>

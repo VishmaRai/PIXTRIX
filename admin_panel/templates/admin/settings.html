@@ -1,0 +1,81 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Plan Management</h6>
+            </div>
+            <div class="card-body">
+                {% for plan in plans %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">{{ plan.name }} </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('update_plan') }}">
+                            <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="name_{{ plan.id }}">Plan Name</label>
+                                        <input type="text" class="form-control" id="name_{{ plan.id }}" 
+                                               name="name" value="{{ plan.name }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="credits_{{ plan.id }}">Credits</label>
+                                        <input type="number" class="form-control" id="credits_{{ plan.id }}" 
+                                               name="credits" value="{{ plan.credits }}" min="1" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="amount_{{ plan.id }}">Price (रु)</label>
+                                        <input type="number" class="form-control" id="amount_{{ plan.id }}" 
+                                               name="amount" value="{{ plan.amount }}" step="0.01" min="0" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="active_{{ plan.id }}">Status</label>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" 
+                                                   id="active_{{ plan.id }}" name="active" 
+                                                   {% if plan.active %}checked{% endif %}>
+                                            <label class="form-check-label" for="active_{{ plan.id }}">Active</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Update Plan</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not plans %}
+                <div class="alert alert-info">
+                    <p>No plans found in the database.</p>
+                    <p>You can add default plans by running the following SQL:</p>
+                    <pre>
+INSERT OR IGNORE INTO plans (id, name, credits, amount, active) VALUES 
+('basic', 'Basic Plan', 10, 9.99, 1),
+('pro', 'Pro Plan', 150, 29.99, 1);
+                    </pre>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends "admin/base.html" %}
+
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">User Management</h6>
+        <span class="badge bg-primary">{{ total_users }} Total Users</span>
+    </div>
+    <div class="card-body">
+        <!-- Search Form -->
+        <form method="GET" class="mb-4">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="search" class="form-label">Search Users</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Search by username, email, or subscription..." 
+                           value="{{ search }}">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="subscription_status" class="form-label">Subscription Status</label>
+                    <select class="form-select" id="subscription_status" name="subscription_status">
+                        <option value="">All Statuses</option>
+                        <option value="active" {% if subscription_status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if subscription_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="expired" {% if subscription_status == 'expired' %}selected{% endif %}>Expired</option>
+                        <option value="no_subscription" {% if subscription_status == 'no_subscription' %}selected{% endif %}>No Subscription</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3 d-flex align-items-end">
+                    <div>
+                        <button type="submit" class="btn btn-primary me-2">Search</button>
+                        <a href="{{ url_for('users') }}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Results Info -->
+        {% if search or subscription_status %}
+        <div class="alert alert-info">
+            Showing results for: 
+            {% if search %}<strong>Search: "{{ search }}"</strong>{% endif %}
+            {% if search and subscription_status %} and {% endif %}
+            {% if subscription_status %}<strong>Status: "{{ subscription_status }}"</strong>{% endif %}
+            <a href="{{ url_for('users') }}" class="btn btn-sm btn-outline-primary ms-2">Clear Filters</a>
+        </div>
+        {% endif %}
+
+        <!-- Users Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Credits</th>
+                        <th>Subscription</th>
+                        <th>Plan</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Verified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if users %}
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.credits }}</td>
+                            <td>
+                                {% if user.plan_name %}
+                                    <span class="badge bg-success">Subscribed</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No Subscription</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.plan_name or 'N/A' }}</td>
+                            <td>{{ user.start_date or 'N/A' }}</td>
+                            <td>{{ user.end_date or 'N/A' }}</td>
+                            <td>
+                                {% if user.subscription_status == 'active' %}
+                                    <span class="badge bg-success">Active</span>
+                                {% elif user.subscription_status == 'inactive' %}
+                                    <span class="badge bg-warning">Inactive</span>
+                                {% elif user.subscription_status == 'expired' %}
+                                    <span class="badge bg-danger">Expired</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.created_at.split(' ')[0] }}</td>
+                            <td>
+                                {% if user.verified %}
+                                    <span class="badge bg-success">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-danger">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="11" class="text-center">No users found matching your criteria.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('users', page=page-1, search=search, subscription_status=subscription_status) }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ p }}</span>
+                        </li>
+                    {% elif p > page - 3 and p < page + 3 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('users', page=p, search=search, subscription_status=subscription_status) }}">{{ p }}</a>
+                        </li>
+                    {% elif p == 1 or p == total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('users', page=p, search=search, subscription_status=subscription_status) }}">{{ p }}</a>
+                        </li>
+                    {% elif p == 2 or p == total_pages - 1 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('users', page=page+1, search=search, subscription_status=subscription_status) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

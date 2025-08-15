@@ -1,0 +1,6 @@
+Flask
+werkzeug
+requests
+Flask-Mail
+Flask-Limiter
+Flask-Login
